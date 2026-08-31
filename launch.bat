@@ -33,11 +33,7 @@ echo.
 :: Run security verification tests
 echo  Step 2/3: Executing compliance security tests...
 echo.
-call npx tsc --module commonjs --moduleResolution node --project apps/web/tsconfig.json apps/web/tests/security-audit.ts
-call node apps/web/tests/security-audit.js
-del apps/web\tests\security-audit.js >nul 2>nul
-del apps/web\lib\db-mock\index.js >nul 2>nul
-del apps/web\lib\agents\index.js >nul 2>nul
+call npx --prefix apps/web tsx apps/web/tests/security-audit.ts
 echo.
 echo [OK] Security audit passed.
 echo.
