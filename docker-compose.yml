@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Next.js Web Frontend & API Server
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/web.Dockerfile
+    image: hrflow-web:latest
+    container_name: hrflow-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/hrflow_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - hrflow-network
+
+  # Background Workers & Job Runner
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/web.Dockerfile
+    image: hrflow-worker:latest
+    container_name: hrflow-worker
+    restart: always
+    command: ["node", "apps/web/worker.js"]
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/hrflow_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - hrflow-network
+
+  # PostgreSQL Relational & Vector Storage
+  db:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/database.Dockerfile
+    image: hrflow-db:latest
+    container_name: hrflow-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=hrflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrflow-network
+
+  # Redis Queue & Cache
+  redis:
+    image: redis:7-alpine
+    container_name: hrflow-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrflow-network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  hrflow-network:
+    driver: bridge
