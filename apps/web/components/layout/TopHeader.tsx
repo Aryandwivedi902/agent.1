@@ -50,9 +50,9 @@ export const TopHeader: React.FC = () => {
       {/* Left side: Breadcrumb & Editable Workflow Name */}
       <div className="flex items-center gap-3">
         <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-400">
-          <span>Projects</span>
+          <span>HR Projects</span>
           <ChevronRight className="w-3 h-3 text-slate-600" />
-          <span>AI Research</span>
+          <span>Talent Acquisition</span>
           <ChevronRight className="w-3 h-3 text-slate-600" />
         </div>
 

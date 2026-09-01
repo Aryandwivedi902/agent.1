@@ -2,137 +2,137 @@ import { create } from 'zustand';
 import { Node, Edge, Connection, addEdge, applyNodeChanges, applyEdgeChanges, NodeChange, EdgeChange } from '@xyflow/react';
 import { WorkflowNodeData, ExecutionStepLog, NodeExecutionStatus } from '../types/workflow';
 
-// Initial default example workflow
+// Default HR Workflow: Automated Employee Onboarding & Resume Screening
 export const INITIAL_NODES: Node<WorkflowNodeData>[] = [
   {
-    id: 'node-webhook',
+    id: 'node-hr-webhook',
     type: 'customNode',
-    position: { x: 100, y: 200 },
+    position: { x: 80, y: 220 },
     data: {
-      label: 'Webhook Trigger',
+      label: 'Job Application Webhook',
       category: 'trigger',
       typeId: 'webhook',
       iconName: 'Webhook',
-      description: 'Receives incoming HTTP payload from customer webhooks',
+      description: 'Receives new candidate resumes from Greenhouse/Workday',
       status: 'idle',
       config: {
         method: 'POST',
-        webhookUrl: 'https://api.flowforge.ai/v1/webhooks/inbound-support',
+        webhookUrl: 'https://api.hrflow.ai/v1/webhooks/talent-inbound',
       },
     },
   },
   {
-    id: 'node-extract',
+    id: 'node-extract-resume',
     type: 'customNode',
-    position: { x: 420, y: 200 },
+    position: { x: 400, y: 220 },
     data: {
-      label: 'Extract User Message',
+      label: 'Extract Candidate Profile',
       category: 'logic',
       typeId: 'transform',
       iconName: 'Code',
-      description: 'Parses JSON payload to isolate user body & metadata',
+      description: 'Parses PDF resume to extract skills, experience & contact details',
       status: 'idle',
       config: {
-        condition: 'payload.message !== undefined',
+        condition: 'resume.skills.length > 0',
       },
     },
   },
   {
-    id: 'node-ai-agent',
+    id: 'node-recruitment-agent',
     type: 'customNode',
-    position: { x: 740, y: 200 },
+    position: { x: 720, y: 220 },
     data: {
-      label: 'AI Support Agent',
+      label: 'Recruitment AI Agent',
       category: 'ai',
       typeId: 'ai-agent',
       iconName: 'Bot',
-      description: 'Evaluates intent and retrieves candidate responses',
+      description: 'Evaluates applicant suitability against target job description',
       status: 'idle',
       config: {
-        model: 'GPT-4o (OpenAI)',
-        systemPrompt: 'You are an expert customer support agent. Analyze intent, search knowledge base, and answer politely.',
-        userInput: '{{ node-extract.message }}',
-        temperature: 0.3,
-        tools: ['Knowledge Base', 'CRM Lookup'],
-        memory: 'Conversation Buffer Window (k=5)',
+        model: 'GPT-4o (HR Specialized)',
+        systemPrompt: 'Evaluate candidate qualifications against Sr. Software Engineer role. Check Node.js, React, and Python experience.',
+        userInput: '{{ node-extract-resume.profile }}',
+        temperature: 0.2,
+        tools: ['HR Knowledge Base', 'Workday API', 'Greenhouse ATS'],
+        memory: 'Candidate Profile Memory Buffer',
       },
     },
   },
   {
-    id: 'node-knowledge',
+    id: 'node-hr-policy-search',
     type: 'customNode',
-    position: { x: 1060, y: 200 },
+    position: { x: 1040, y: 220 },
     data: {
-      label: 'Knowledge Base Search',
+      label: 'HR Policy & Band Matcher',
       category: 'ai',
       typeId: 'vector-db',
       iconName: 'Database',
-      description: 'Queries vector store for matching product docs',
+      description: 'Verifies salary band expectations against company compensation bands',
       status: 'idle',
       config: {
-        collection: 'support-docs-v2',
-        topK: 5,
+        collection: 'hr-salary-bands-2026',
+        topK: 3,
       },
     },
   },
   {
-    id: 'node-decision',
+    id: 'node-hr-decision',
     type: 'customNode',
-    position: { x: 1380, y: 200 },
+    position: { x: 1360, y: 220 },
     data: {
-      label: 'Confidence Decision',
+      label: 'Qualification Check',
       category: 'logic',
       typeId: 'if-else',
       iconName: 'GitFork',
-      description: 'Branches based on AI answer confidence score',
+      description: 'Branches based on AI match score (threshold >= 85%)',
       status: 'idle',
       config: {
-        condition: 'confidenceScore >= 0.85',
+        condition: 'matchScore >= 85 && salaryExpectation <= bandMax',
       },
     },
   },
   {
-    id: 'node-reply',
+    id: 'node-send-interview',
     type: 'customNode',
-    position: { x: 1720, y: 100 },
+    position: { x: 1700, y: 120 },
     data: {
-      label: 'Send Customer Reply',
+      label: 'Schedule Interview Email',
       category: 'output',
       typeId: 'send-message',
       iconName: 'Send',
-      description: 'Sends automated response email/chat reply',
+      description: 'Sends Calendly booking invite link to qualified candidate',
       status: 'idle',
       config: {
-        channel: 'Email / Web Chat',
+        channel: 'Email (SendGrid)',
       },
     },
   },
   {
-    id: 'node-ticket',
+    id: 'node-create-hr-ticket',
     type: 'customNode',
-    position: { x: 1720, y: 320 },
+    position: { x: 1700, y: 340 },
     data: {
-      label: 'Create Support Ticket',
+      label: 'Escalate to HR Recruiter',
       category: 'integration',
       typeId: 'crm',
       iconName: 'Ticket',
-      description: 'Escalates query to Zendesk/CRM human queue',
+      description: 'Routes candidate application to human HR recruiter queue for manual review',
       status: 'idle',
       config: {
-        priority: 'High',
-        assignee: 'Tier-2 Support',
+        priority: 'Medium',
+        assignee: 'Talent Acquisition Team',
       },
     },
   },
 ];
 
 export const INITIAL_EDGES: Edge[] = [
-  { id: 'e1-2', source: 'node-webhook', target: 'node-extract', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
-  { id: 'e2-3', source: 'node-extract', target: 'node-ai-agent', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
-  { id: 'e3-4', source: 'node-ai-agent', target: 'node-knowledge', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
-  { id: 'e4-5', source: 'node-knowledge', target: 'node-decision', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
-  { id: 'e5-6', source: 'node-decision', target: 'node-reply', label: 'High Confidence', animated: true, style: { strokeWidth: 2, stroke: '#10b981' } },
-  { id: 'e5-7', source: 'node-decision', target: 'node-ticket', label: 'Escalate', animated: true, style: { strokeWidth: 2, stroke: '#f59e0b' } },
+  { id: 'e1-2', source: 'node-hr-webhook', target: 'node-extract-resume', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
+  { id: 'e2-3', source: 'node-extract-resume', target: 'node-recruitment-agent', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
+  { id: 'e3-4', source: 'node-recruitment-agent', target: 'node-hr-policy-search', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
+  { id: 'e4-5', source: 'node-hr-policy-search', target: 'node-hr-decision', animated: true, style: { strokeWidth: 2, stroke: '#6366f1' } },
+  { id: 'e5-6', source: 'node-hr-decision', target: 'node-send-interview', label: 'Match Score >= 85%', animated: true, style: { strokeWidth: 2, stroke: '#10b981' } },
+  { id: 'e5-7', source: 'node-hr-decision', target: 'node-create-hr-ticket', label: 'Manual Review', animated: true, style: { strokeWidth: 2, stroke: '#f59e0b' } },
 ];
 
 interface WorkflowStoreState {
@@ -191,8 +191,8 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 
   // Metadata
-  workflowId: 'wf-customer-support-01',
-  workflowName: 'Customer Support AI Agent',
+  workflowId: 'wf-hr-recruitment-01',
+  workflowName: 'Candidate Resume Screening & Onboarding Agent',
   setWorkflowName: (name) => set({ workflowName: name, isSaved: false }),
   workflowStatus: 'published',
   setWorkflowStatus: (status) => set({ workflowStatus: status }),
@@ -283,11 +283,11 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
     }));
   },
 
-  // Undo / Redo (simple reset/history mock)
+  // Undo / Redo
   undo: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES }),
   redo: () => set({ nodes: INITIAL_NODES, edges: INITIAL_EDGES }),
 
-  // Execution Simulation
+  // HR Execution Simulation
   isExecuting: false,
   executionStatus: 'idle',
   executionLogs: [],
@@ -307,12 +307,12 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
     }));
 
     const executionSteps = [
-      { id: 'node-webhook', name: 'Webhook Trigger', duration: 24 },
-      { id: 'node-extract', name: 'Extract User Message', duration: 38 },
-      { id: 'node-ai-agent', name: 'AI Support Agent', duration: 1240 },
-      { id: 'node-knowledge', name: 'Knowledge Base Search', duration: 420 },
-      { id: 'node-decision', name: 'Confidence Decision', duration: 18 },
-      { id: 'node-reply', name: 'Send Customer Reply', duration: 110 },
+      { id: 'node-hr-webhook', name: 'Job Application Webhook', duration: 32 },
+      { id: 'node-extract-resume', name: 'Extract Candidate Profile', duration: 45 },
+      { id: 'node-recruitment-agent', name: 'Recruitment AI Agent', duration: 1150 },
+      { id: 'node-hr-policy-search', name: 'HR Policy & Band Matcher', duration: 380 },
+      { id: 'node-hr-decision', name: 'Qualification Check', duration: 15 },
+      { id: 'node-send-interview', name: 'Schedule Interview Email', duration: 140 },
     ];
 
     for (const step of executionSteps) {
@@ -331,8 +331,8 @@ export const useWorkflowStore = create<WorkflowStoreState>((set, get) => ({
         status: 'success',
         durationMs: step.duration,
         timestamp: new Date().toLocaleTimeString(),
-        input: { trigger: 'HTTP POST /inbound-support', body: { customerId: 'usr-9281', query: 'How to reset API key?' } },
-        output: { result: 'Success', confidenceScore: 0.94, replySent: true },
+        input: { trigger: 'Greenhouse Webhook', candidate: { name: 'Sarah Connor', position: 'Sr. Software Engineer' } },
+        output: { result: 'Qualified', matchScore: 92, interviewLinkSent: true },
       };
 
       // Set node success

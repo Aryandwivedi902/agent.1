@@ -61,7 +61,7 @@ export const Sidebar: React.FC = () => {
               <Sparkles className="w-4 h-4" />
             </div>
             <span className="bg-gradient-to-r from-indigo-300 via-white to-slate-300 bg-clip-text text-transparent">
-              FlowForge AI
+              HRFlow AI
             </span>
           </Link>
         )}
@@ -102,17 +102,23 @@ export const Sidebar: React.FC = () => {
           })}
         </nav>
 
-        {/* Projects Section */}
+        {/* HR Projects Section */}
         {!collapsed && (
           <div className="space-y-2">
             <div className="flex items-center justify-between px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-              <span>Projects</span>
+              <span>HR Departments</span>
               <button className="p-1 hover:text-slate-200 hover:bg-slate-800 rounded">
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
             <div className="space-y-0.5">
-              {projects.map((proj, idx) => (
+              {[
+                { name: 'Global HR Operations', active: true },
+                { name: 'Talent Acquisition', active: false },
+                { name: 'Employee Onboarding', active: false },
+                { name: 'Payroll & Compensation', active: false },
+                { name: 'HR Compliance & Legal', active: false },
+              ].map((proj, idx) => (
                 <button
                   key={idx}
                   className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs transition-colors ${

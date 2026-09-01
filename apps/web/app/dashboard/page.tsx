@@ -20,19 +20,19 @@ import Link from 'next/link';
 
 export default function DashboardPage() {
   const stats = [
-    { label: 'Total Workflows', value: '24', change: '+3 this week', icon: GitFork, color: 'text-indigo-400' },
-    { label: 'Active Workflows', value: '18', change: '75% operational', icon: Zap, color: 'text-emerald-400' },
-    { label: 'Executions Today', value: '12,450', change: '+18.4% vs avg', icon: Activity, color: 'text-sky-400' },
-    { label: 'Success Rate', value: '98.6%', change: '99.9% uptime SLA', icon: CheckCircle2, color: 'text-emerald-400' },
-    { label: 'AI LLM Requests', value: '8,234', change: 'Avg 312ms latency', icon: Sparkles, color: 'text-purple-400' },
+    { label: 'Total HR Workflows', value: '24', change: '+3 new this week', icon: GitFork, color: 'text-indigo-400' },
+    { label: 'Active HR Agents', value: '18', change: '100% operational', icon: Zap, color: 'text-emerald-400' },
+    { label: 'Automated Runs Today', value: '12,450', change: '+18.4% vs last week', icon: Activity, color: 'text-sky-400' },
+    { label: 'Policy Compliance', value: '99.8%', change: 'Zero audit violations', icon: CheckCircle2, color: 'text-emerald-400' },
+    { label: 'Resumes Processed', value: '8,234', change: 'Avg 45s per applicant', icon: Sparkles, color: 'text-purple-400' },
   ];
 
   const recentExecutions = [
-    { id: 'exec-98201', workflow: 'Customer Support AI Agent', status: 'success', time: '2 mins ago', duration: '1.8s', items: 1 },
-    { id: 'exec-98200', workflow: 'Lead Qualification Agent', status: 'success', time: '15 mins ago', duration: '2.4s', items: 4 },
-    { id: 'exec-98199', workflow: 'Customer Support AI Agent', status: 'failed', time: '28 mins ago', duration: '620ms', items: 1 },
-    { id: 'exec-98198', workflow: 'Employee Onboarding Checklist', status: 'success', time: '1 hour ago', duration: '3.8s', items: 12 },
-    { id: 'exec-98197', workflow: 'Sentry Bug Auto-Triage', status: 'success', time: '3 hours ago', duration: '1.1s', items: 2 },
+    { id: 'exec-hr-98201', workflow: 'Candidate Resume Screening & Onboarding Agent', status: 'success', time: '2 mins ago', duration: '1.8s', items: 1 },
+    { id: 'exec-hr-98200', workflow: 'New Hire Onboarding & Equipment Provisioning', status: 'success', time: '15 mins ago', duration: '2.4s', items: 4 },
+    { id: 'exec-hr-98199', workflow: 'PTO & Benefits Policy AI Inquiry Desk', status: 'success', time: '28 mins ago', duration: '620ms', items: 1 },
+    { id: 'exec-hr-98198', workflow: 'Payroll Change Compliance Audit', status: 'success', time: '1 hour ago', duration: '3.8s', items: 12 },
+    { id: 'exec-hr-98197', workflow: 'Quarterly Performance Review Reminder System', status: 'success', time: '3 hours ago', duration: '1.1s', items: 2 },
   ];
 
   return (
