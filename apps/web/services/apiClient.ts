@@ -103,6 +103,26 @@ export const apiClient = {
     return res.json();
   },
 
+  async updateApiKey(provider: string, apiKey: string): Promise<any> {
+    const token = this.getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${API_BASE_URL}/api/settings/api-keys`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ provider, apiKey }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to save API Key');
+    }
+
+    return res.json();
+  },
+
   async getAuditLogs(): Promise<any[]> {
     const token = this.getToken();
     const headers: Record<string, string> = {};

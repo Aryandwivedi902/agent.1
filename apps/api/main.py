@@ -35,6 +35,10 @@ class ApprovalActionRequest(BaseModel):
     action: str # approve, reject
     comment: Optional[str] = None
 
+class ApiKeyConfigRequest(BaseModel):
+    provider: str
+    apiKey: str
+
 class OnboardingRegisterRequest(BaseModel):
     companyName: str
     domain: str
@@ -233,6 +237,26 @@ def execute_approval(
 
     db.commit()
     return {"status": "success", "approvalStatus": app.status}
+
+@app.post("/api/settings/api-keys")
+def update_api_key(
+    req: ApiKeyConfigRequest,
+    current_user: UserSession = Depends(require_hr_admin),
+    db: Session = Depends(get_db)
+):
+    backend_orchestrator.set_api_key(req.apiKey)
+    log = AuditLog(
+        organization_id=uuid.UUID(current_user.organization_id),
+        actor=current_user.email,
+        actor_type="user",
+        action="UPDATE_API_KEY",
+        resource="settings",
+        result="success",
+        details=f"Configured API Key for provider: {req.provider}"
+    )
+    db.add(log)
+    db.commit()
+    return {"status": "success", "provider": req.provider, "message": "API key successfully saved & connected to LLM engine"}
 
 # --- AUDIT LOGS ENDPOINT ---
 
