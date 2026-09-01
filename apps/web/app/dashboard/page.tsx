@@ -1,231 +1,184 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useApp, db } from '../../components/providers/AppContext';
-import Link from 'next/link';
+import React from 'react';
+import { AppLayout } from '../../components/layout/AppLayout';
 import {
-  Users,
-  CheckSquare,
-  FileQuestion,
-  BookOpen,
+  GitFork,
+  Activity,
+  CheckCircle2,
+  Zap,
   TrendingUp,
-  AlertTriangle,
-  ArrowRight,
-  Bot
+  Sparkles,
+  ArrowUpRight,
+  Clock,
+  Play,
+  Layers,
 } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import Link from 'next/link';
 
-export default function Dashboard() {
-  const { activeOrgId, currentUser } = useApp();
-  const [metrics, setMetrics] = useState({
-    employees: 0,
-    requests: 0,
-    approvals: 0,
-    policies: 0
-  });
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
-  const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
-  const [openRequests, setOpenRequests] = useState<any[]>([]);
+export default function DashboardPage() {
+  const stats = [
+    { label: 'Total Workflows', value: '24', change: '+3 this week', icon: GitFork, color: 'text-indigo-400' },
+    { label: 'Active Workflows', value: '18', change: '75% operational', icon: Zap, color: 'text-emerald-400' },
+    { label: 'Executions Today', value: '12,450', change: '+18.4% vs avg', icon: Activity, color: 'text-sky-400' },
+    { label: 'Success Rate', value: '98.6%', change: '99.9% uptime SLA', icon: CheckCircle2, color: 'text-emerald-400' },
+    { label: 'AI LLM Requests', value: '8,234', change: 'Avg 312ms latency', icon: Sparkles, color: 'text-purple-400' },
+  ];
 
-  useEffect(() => {
-    // Read stats from simulated database
-    const emps = db.getEmployees(activeOrgId);
-    const reqs = db.getRequests(activeOrgId);
-    const apps = db.getApprovals(activeOrgId);
-    const pols = db.getPolicies(activeOrgId);
-    const logs = db.getAuditLogs(activeOrgId);
-
-    setMetrics({
-      employees: emps.length,
-      requests: reqs.filter(r => r.status === 'open').length,
-      approvals: apps.filter(a => a.status === 'pending').length,
-      policies: pols.length
-    });
-
-    setRecentLogs(logs.slice(0, 5));
-    setPendingApprovals(apps.filter(a => a.status === 'pending'));
-    setOpenRequests(reqs.filter(r => r.status === 'open'));
-  }, [activeOrgId]);
+  const recentExecutions = [
+    { id: 'exec-98201', workflow: 'Customer Support AI Agent', status: 'success', time: '2 mins ago', duration: '1.8s', items: 1 },
+    { id: 'exec-98200', workflow: 'Lead Qualification Agent', status: 'success', time: '15 mins ago', duration: '2.4s', items: 4 },
+    { id: 'exec-98199', workflow: 'Customer Support AI Agent', status: 'failed', time: '28 mins ago', duration: '620ms', items: 1 },
+    { id: 'exec-98198', workflow: 'Employee Onboarding Checklist', status: 'success', time: '1 hour ago', duration: '3.8s', items: 12 },
+    { id: 'exec-98197', workflow: 'Sentry Bug Auto-Triage', status: 'success', time: '3 hours ago', duration: '1.1s', items: 2 },
+  ];
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight">HR Operations Dashboard</h2>
-        <p className="text-slate-400 mt-1.5 text-sm">
-          Platform Overview for {activeOrgId === 'org-acme' ? 'Acme Corporation' : 'Globex Corporation'}.
-        </p>
-      </div>
-
-      {/* Critical Alerts Banner (If approvals are pending) */}
-      {metrics.approvals > 0 && (
-        <div className="flex items-center justify-between p-4 bg-amber-950/30 border border-amber-900/40 rounded-2xl text-amber-200 text-sm">
-          <div className="flex items-center space-x-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
-            <span>
-              There are **{metrics.approvals} actions pending review** in the Human Approval Center.
-            </span>
+    <AppLayout>
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        {/* Top Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100">Good Morning, Aryan</h1>
+            <p className="text-sm text-slate-400">Overview of your AI agent automation platform performance</p>
           </div>
-          <Link
-            href="/approvals"
-            className="flex items-center space-x-1.5 font-bold hover:underline text-amber-400 text-xs shrink-0"
-          >
-            <span>Review Queue</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+
+          <Link href="/">
+            <Button variant="primary" icon={<Play className="w-4 h-4 fill-current" />}>
+              Open Workflow Canvas
+            </Button>
           </Link>
         </div>
-      )}
 
-      {/* Metrics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Employees */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Headcount</span>
-              <h3 className="text-3xl font-bold text-slate-100 mt-1">{metrics.employees}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-900/30 text-cyan-400">
-              <Users className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-center space-x-1.5 text-[10px] text-emerald-400 mt-4">
-            <TrendingUp className="w-3 h-3" />
-            <span>Active tenant isolation enabled</span>
-          </div>
-        </div>
-
-        {/* Open Requests */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Unresolved Requests</span>
-              <h3 className="text-3xl font-bold text-slate-100 mt-1">{metrics.requests}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-indigo-950/30 border border-indigo-900/30 text-indigo-400">
-              <FileQuestion className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-center space-x-1.5 text-[10px] text-indigo-400 mt-4">
-            <Bot className="w-3 h-3" />
-            <span>Monitored by Request Agent</span>
-          </div>
-        </div>
-
-        {/* Pending Approvals */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Pending Approvals</span>
-              <h3 className="text-3xl font-bold text-slate-100 mt-1">{metrics.approvals}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-900/30 text-amber-400">
-              <CheckSquare className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-center space-x-1.5 text-[10px] text-amber-400 mt-4">
-            <span>Human-in-the-Loop required</span>
-          </div>
-        </div>
-
-        {/* Company Policies */}
-        <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Company Policies</span>
-              <h3 className="text-3xl font-bold text-slate-100 mt-1">{metrics.policies}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-violet-950/30 border border-violet-900/30 text-violet-400">
-              <BookOpen className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-center space-x-1.5 text-[10px] text-violet-400 mt-4">
-            <span>Indexed in knowledge RAG</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Section split: Activities and Operational Queues */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Columns: Approvals and Tickets */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Active approvals card */}
-          <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-850 pb-3">
-              <h4 className="text-md font-bold text-slate-200">Pending Approvals Queue</h4>
-              <Link href="/approvals" className="text-xs text-cyan-400 hover:underline">View All</Link>
-            </div>
-            <div className="space-y-3">
-              {pendingApprovals.length > 0 ? (
-                pendingApprovals.map(app => (
-                  <div key={app.id} className="p-3 bg-slate-950 border border-slate-850 rounded-xl flex items-center justify-between text-xs">
-                    <div>
-                      <span className="font-semibold text-slate-300 block">{app.actionType.replace('_', ' ').toUpperCase()}</span>
-                      <span className="text-slate-500">Requested by {app.requestedBy}</span>
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-400 font-bold border border-amber-900/40 uppercase text-[9px]">
-                      {app.riskLevel} Risk
-                    </span>
+        {/* Statistic Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={idx}
+                className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex flex-col justify-between space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-400">{stat.label}</span>
+                  <div className={`p-2 rounded-lg bg-slate-950 border border-slate-800 ${stat.color}`}>
+                    <Icon className="w-4 h-4" />
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500 text-xs">No pending actions requiring review.</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-extrabold text-slate-100">{stat.value}</div>
+                  <div className="flex items-center gap-1 text-[11px] text-emerald-400 mt-1">
+                    <TrendingUp className="w-3 h-3" />
+                    <span>{stat.change}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Activity & Performance Visualizer */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Activity Chart Mock */}
+          <div className="lg:col-span-2 p-5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-100">Workflow Execution Activity</h3>
+                <p className="text-xs text-slate-400">Real-time throughput across all active agents</p>
+              </div>
+              <Badge variant="purple">24 Hour Window</Badge>
+            </div>
+
+            {/* Visual Bars for Chart */}
+            <div className="h-48 flex items-end gap-2 pt-6 px-2">
+              {[45, 60, 35, 80, 95, 120, 110, 85, 130, 150, 140, 160, 180, 210, 195, 220, 240, 210, 260, 280, 290, 310, 275, 330].map(
+                (val, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+                    <div
+                      style={{ height: `${(val / 330) * 100}%` }}
+                      className="w-full bg-indigo-600/60 group-hover:bg-indigo-500 rounded-t transition-all"
+                    />
+                  </div>
+                )
               )}
             </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+              <span>00:00 AM</span>
+              <span>06:00 AM</span>
+              <span>12:00 PM</span>
+              <span>06:00 PM</span>
+              <span>11:59 PM</span>
+            </div>
           </div>
 
-          {/* Open Tickets card */}
-          <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-850 pb-3">
-              <h4 className="text-md font-bold text-slate-200">Open Tickets & Requests</h4>
-              <Link href="/requests" className="text-xs text-indigo-400 hover:underline">View All</Link>
-            </div>
+          {/* Top Performing Workflows */}
+          <div className="p-5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-4">
+            <h3 className="text-base font-bold text-slate-100">Top Performing Workflows</h3>
             <div className="space-y-3">
-              {openRequests.length > 0 ? (
-                openRequests.map(req => (
-                  <div key={req.id} className="p-3 bg-slate-950 border border-slate-850 rounded-xl flex items-center justify-between text-xs">
-                    <div>
-                      <span className="font-semibold text-slate-300 block">{req.title}</span>
-                      <span className="text-slate-500">From {req.employeeName}</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-400 font-medium">
-                      {req.priority}
-                    </span>
+              {[
+                { name: 'Customer Support AI Agent', runs: '12,430 runs', success: '98.4%' },
+                { name: 'Lead Qualification Agent', runs: '8,932 runs', success: '96.2%' },
+                { name: 'Employee Onboarding Checklist', runs: '412 runs', success: '100%' },
+                { name: 'Sentry Bug Auto-Triage', runs: '1,840 runs', success: '92.1%' },
+              ].map((wf, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-3 rounded-lg border border-slate-800/80 bg-slate-950/60"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-200">{wf.name}</span>
+                    <span className="text-[10px] text-slate-500">{wf.runs}</span>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500 text-xs">No open employee tickets.</div>
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Column: Recent Audits */}
-        <div className="space-y-8">
-          <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-850 pb-3">
-              <h4 className="text-md font-bold text-slate-200">Recent Audit Logs</h4>
-              <Link href="/audit-log" className="text-xs text-violet-400 hover:underline">View Log</Link>
-            </div>
-            <div className="space-y-3.5">
-              {recentLogs.map(log => (
-                <div key={log.id} className="text-xs space-y-1">
-                  <div className="flex justify-between text-slate-400">
-                    <span className="font-semibold text-slate-300">{log.action}</span>
-                    <span className="text-slate-600 text-[10px]">
-                      {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <p className="text-slate-500 text-[11px] leading-relaxed truncate">{log.details}</p>
+                  <Badge variant="success">{wf.success}</Badge>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
+        {/* Recent Executions Table */}
+        <div className="p-5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-slate-100">Recent Workflow Runs</h3>
+            <Link href="/executions" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
+              View All History &rarr;
+            </Link>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                  <th className="pb-3 font-semibold">Execution ID</th>
+                  <th className="pb-3 font-semibold">Workflow Name</th>
+                  <th className="pb-3 font-semibold">Status</th>
+                  <th className="pb-3 font-semibold">Duration</th>
+                  <th className="pb-3 font-semibold">Items</th>
+                  <th className="pb-3 font-semibold">Triggered At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 font-mono">
+                {recentExecutions.map((row) => (
+                  <tr key={row.id} className="hover:bg-slate-850/50 transition-colors">
+                    <td className="py-3 text-indigo-400 font-bold">{row.id}</td>
+                    <td className="py-3 text-slate-200 font-sans font-medium">{row.workflow}</td>
+                    <td className="py-3">
+                      <Badge variant={row.status === 'success' ? 'success' : 'error'}>
+                        {row.status.toUpperCase()}
+                      </Badge>
+                    </td>
+                    <td className="py-3 text-slate-300">{row.duration}</td>
+                    <td className="py-3 text-slate-300">{row.items}</td>
+                    <td className="py-3 text-slate-400 font-sans">{row.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

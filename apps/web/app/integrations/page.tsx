@@ -1,76 +1,113 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useApp, db } from '../../components/providers/AppContext';
-import { Globe, Shield, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { AppLayout } from '../../components/layout/AppLayout';
+import { Zap, Search, CheckCircle2, Plug, Sparkles, Database, MessageSquare, Table, FileText, Users, GitBranch, Globe } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { mockIntegrations } from '../../services/integrationService';
 
-export default function IntegrationsHub() {
-  const { activeOrgId, currentUser, refreshData } = useApp();
-  const [integrations, setIntegrations] = useState<any[]>([]);
+const iconMap: Record<string, any> = {
+  Sparkles,
+  MessageSquare,
+  Database,
+  Table,
+  FileText,
+  Users,
+  GitBranch,
+  Globe,
+};
 
-  useEffect(() => {
-    setIntegrations(db.getIntegrations(activeOrgId));
-  }, [activeOrgId]);
+export default function IntegrationsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
-  const handleToggle = (id: string) => {
-    db.toggleIntegration(activeOrgId, id, currentUser.email);
-    setIntegrations(db.getIntegrations(activeOrgId));
-    refreshData();
-  };
+  const categories = ['all', 'AI', 'Communication', 'Databases', 'Productivity', 'CRM', 'Developer Tools'];
+
+  const filtered = mockIntegrations.filter((item) => {
+    const matchesCat = categoryFilter === 'all' || item.category === categoryFilter;
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight flex items-center space-x-2">
-          <Globe className="w-8 h-8 text-cyan-400" />
-          <span>Integration Hub</span>
-        </h2>
-        <p className="text-slate-400 mt-1.5 text-sm">
-          Coordinate external provider adapters for calendar sync and directory provisioning.
-        </p>
-      </div>
+    <AppLayout>
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100">App Integrations Marketplace</h1>
+            <p className="text-sm text-slate-400">Connect your AI agents to databases, APIs, and enterprise software</p>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {integrations.map(int => (
-          <div key={int.id} className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl backdrop-blur-md flex flex-col justify-between space-y-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="font-bold text-slate-200 block text-md">{int.providerName}</span>
-                <span className="text-xs text-slate-500 block mt-1">Provider ID: {int.id}</span>
-              </div>
-              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider border uppercase ${
-                int.status === 'connected'
-                  ? 'bg-emerald-950 text-emerald-400 border-emerald-900/30'
-                  : 'bg-slate-950 text-slate-500 border-slate-850'
-              }`}>
-                {int.status}
-              </span>
-            </div>
+        {/* Filter controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search integrations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder-slate-500"
+            />
+          </div>
 
-            <p className="text-slate-400 text-xs leading-relaxed font-sans">
-              Connect corporate workspace accounts to sync communication data with Email and Onboarding agents.
-            </p>
-
-            <div className="flex justify-between items-center pt-3 border-t border-slate-850">
-              <span className="text-[10px] text-slate-600 font-mono">
-                {int.lastConnected ? `Connected ${new Date(int.lastConnected).toLocaleDateString()}` : 'Disconnected'}
-              </span>
+          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 custom-scrollbar">
+            {categories.map((cat) => (
               <button
-                type="button"
-                onClick={() => handleToggle(int.id)}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
-                  int.status === 'connected'
-                    ? 'bg-rose-950/20 text-rose-400 border-rose-900/30 hover:bg-rose-950/40'
-                    : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-transparent'
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-3 py-1 rounded text-xs font-semibold shrink-0 transition-colors ${
+                  categoryFilter === cat
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 bg-slate-950 border border-slate-800'
                 }`}
               >
-                {int.status === 'connected' ? 'Disconnect' : 'Connect Account'}
+                {cat}
               </button>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* Integration Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {filtered.map((item) => {
+            const Icon = iconMap[item.iconName] || Plug;
+            return (
+              <div
+                key={item.id}
+                className="p-5 rounded-xl border border-slate-800 bg-slate-900/60 hover:border-indigo-500/50 transition-all flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <Badge variant={item.isConnected ? 'success' : 'default'}>
+                      {item.isConnected ? 'CONNECTED' : 'DISCONNECTED'}
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-100">{item.name}</h3>
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase">{item.category}</span>
+                  </div>
+
+                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{item.description}</p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500 font-mono">{item.authType}</span>
+                  <Button variant={item.isConnected ? 'outline' : 'primary'} size="sm">
+                    {item.isConnected ? 'Configure' : 'Connect App'}
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
