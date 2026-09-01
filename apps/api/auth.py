@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv("AUTH_SECRET", "generate_a_secure_long_secret_here_for_ne
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 security_bearer = HTTPBearer()
 
 # --- Pydantic Schemas for Auth Context ---
