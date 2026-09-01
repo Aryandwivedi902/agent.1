@@ -43,8 +43,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (onboardingFlag) {
         setOnboardingComplete(onboardingFlag === 'true');
       } else {
-        // Default to not complete to show first-user experience
-        setOnboardingComplete(false);
+        setOnboardingComplete(true);
       }
 
       // Load matching users list

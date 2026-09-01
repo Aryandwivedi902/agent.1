@@ -65,12 +65,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
     { name: 'Audit Log', path: '/audit-log', icon: History }
   ];
 
-  // Route to onboarding wizard if not complete
-  React.useEffect(() => {
-    if (mounted && !onboardingComplete && !isLandingOrLoginOrOnboard) {
-      router.push('/onboarding');
-    }
-  }, [mounted, onboardingComplete, isLandingOrLoginOrOnboard, router]);
+
 
   if (!mounted) {
     return <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-semibold text-sm" suppressHydrationWarning>Loading HRFlow AI...</div>;
